@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 Int              @id @default(autoincrement())
+  username           String           @unique
+  email              String           @unique
+  password           String
+  profileImgUrl      String?          @default("")
+  regDate            DateTime?        @default(now())
+  ipadress           String?
+  isAdmin            Boolean          @default(false)
+  writtenTopics      Topic[]          @relation("wrtten topics")
+  savedTopics        Topic[]          @relation("savedTopics")
+  materials          Materials[]      @relation("wrttenMaterials")
+  falcuty            Falcuty[]
+  department         Department[]
+  UserPreference     UserPreference[]
+  TopicsUserFollowed Topic[]
+  following          Following[]
+  followers          Followers[]
+  role               Role             @default(USER)
+}
+
+enum Role {
+  USER
+  ADMIN
+  MODERATOR
+}
+
+model Following {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+}
+
+model Followers {
+  id     Int  @id @default(autoincrement())
+  user   User @relation(fields: [userId], references: [id])
+  userId Int
+}
+
+model UserPreference {
+  id           Int        @id @default(autoincrement())
+  emailUpdates Boolean
+  user         User       @relation(fields: [userId], references: [id])
+  userId       Int
+  topic        Topic      @relation(fields: [topicId], references: [id])
+  topicId      Int
+  courseCode   CourseCode @relation(fields: [courseCodeId], references: [id])
+  courseCodeId Int
+}
+
+model Topic {
+  id             Int              @id @default(autoincrement())
+  title          String
+  slug           String           @unique
+  content        String
+  createdDate    DateTime?        @default(now())
+  updatedDate    DateTime?        @default(now())
+  author         User?            @relation("wrtten topics", fields: [authorId], references: [id])
+  authorId       Int
+  savedBy        User?            @relation("savedTopics", fields: [SavedId], references: [id])
+  SavedId        Int?
+  category       String
+  categotySlug   String
+  coverImageUrl  String?
+  likes          Int?             @default(0)
+  viwes          Int?             @default(0)
+  falcuty        Falcuty[]
+  department     Department[]
+  UserPreference UserPreference[]
+  Userfolowing   User?            @relation(fields: [folowinguserId], references: [id])
+  folowinguserId Int?
+}
+
+model Materials {
+  id            Int          @id @default(autoincrement())
+  title         String
+  content       String
+  createdDate   DateTime?    @default(now())
+  updatedDate   DateTime?    @default(now())
+  author        User         @relation("wrttenMaterials", fields: [authorId], references: [id])
+  authorId      Int
+  category      String
+  categotySlug  String       @unique
+  coverImageUrl String?      @unique
+  likes         Int?
+  viwes         Int?
+  courseCode    CourseCode[]
+  falcuty       Falcuty[]
+  department    Department[]
+}
+
+model CourseCode {
+  id             Int              @id @default(autoincrement())
+  name           String           @unique
+  slug           String           @unique
+  materials      Materials        @relation(fields: [materialsId], references: [id])
+  materialsId    Int
+  UserPreference UserPreference[]
+}
+
+model Falcuty {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  slug        String    @unique
+  materials   Materials @relation(fields: [materialsId], references: [id])
+  materialsId Int
+  topics      Topic     @relation(fields: [topicId], references: [id])
+  topicId     Int
+  users       User      @relation(fields: [userId], references: [id])
+  userId      Int
+}
+
+model Department {
+  id          Int       @id @default(autoincrement())
+  name        String    @unique
+  slug        String    @unique
+  materials   Materials @relation(fields: [materialsId], references: [id])
+  materialsId Int
+  topics      Topic     @relation(fields: [topicId], references: [id])
+  topicId     Int
+  users       User      @relation(fields: [userId], references: [id])
+  userId      Int
+}
