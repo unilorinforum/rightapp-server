@@ -35,7 +35,6 @@ const createUser = async (req, res, next) => {
             email: email,
             username: username,
             password: password,
-            regDate: date,
           },
         });
         if (user) {
